@@ -1,0 +1,22 @@
+def post_analysis():
+  posts_df = fetch_posts()
+
+  min_date = posts_df["date"].min()
+  max_date = posts_df["date"].max()
+
+  st.sidebar.header("Filters")
+  selected_dates: tuple["timestamp"] = st.sidebar.date_input("Select dates", [min_date, max_date], min_value=min_date, max_value=max_date)
+
+  authors_name = posts_df["author"].unique()
+  selected_authors: list[str] = st.sidebar.multiselect("Select authors", options=authors_name, default=authors_name)
+
+  filtered_df = posts_df.copy()
+  try:
+    filtered_df = posts_df[posts_df["date"].between(selected_dates[0], selected_dates[1])]
+  except:
+    st.error("Please select start date and end date")
+    return
+  
+  filtered_df = filtered_df[filtered_df["author"].isin(selected_authors)]
+
+  st.dataframe(filtered_df)
