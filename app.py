@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
-from great_tables import GT, html
+import datetime
+from great_tables import GT
+
+from src.services import filter_voting
 
 st.set_page_config(layout="wide")
 
@@ -35,37 +37,13 @@ st.sidebar.subheader("Votes")
 
 selector_rubriques: list[str] = st.sidebar.multiselect("Selectionnez les rubriques",
                                                            options=rubriques_rsge["Intitulé rubrique"])
-# Filter votes
+min_date = pl_voting_clean["voting_date"].min()
+max_date = pl_voting_clean["voting_date"].max() + datetime.timedelta(days=1)
 
-def filter_voting(selected_rubriques: list[str]) -> pd.DataFrame:
-    min_date = pl_voting_clean["voting_date"].min()
-    max_date = pl_voting_clean["voting_date"].max()
-    
-
-
-    selected_dates: tuple[datetime.date] = st.sidebar.date_input("Select dates", [min_date, max_date], min_value=min_date, max_value=max_date)
-    selected_dates: tuple[datetime.datetime] = (pd.to_datetime(selected_dates[0]), pd.to_datetime(selected_dates[1]))
-
-
-    chapitre_names = pl_voting_clean.loc[pl_voting_clean["Intitulé rubrique"].isin(selected_rubriques)]["Intitulé chapitre"].unique()
-    selected_chapitre: list[str] = st.sidebar.multiselect("Selectionnez les chapitres", 
-                                                         options=chapitre_names)
-
-    filtered_df = pl_voting_clean.copy()
-    try:
-        filtered_df = filtered_df[filtered_df["voting_date"].between(selected_dates[0], selected_dates[1])]
-
-    except:
-        st.error("Please select start date and end date")
-        return
-
-    if selected_rubriques != []:
-        filtered_df = filtered_df[filtered_df["Intitulé rubrique"].isin(selected_rubriques)]
-    if selected_chapitre != []:
-        filtered_df = filtered_df[filtered_df["Intitulé chapitre"].isin(selected_chapitre)]
-
-    return filtered_df
-
+selector_dates: tuple[datetime.date] = st.sidebar.date_input("Select dates", 
+                                                             [min_date, max_date], 
+                                                             min_value=min_date, 
+                                                             max_value=max_date)
 
 def filter_votes() -> pd.DataFrame:
     
@@ -143,7 +121,12 @@ def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
             links_column: "10%"
         })
     )
-voting_table = filter_voting(selected_rubriques=selector_rubriques)
+voting_table = filter_voting(voting_table= pl_voting_clean,
+                              selected_rubriques = selector_rubriques, 
+                             selected_dates = selector_dates)
+st.write(voting_table.shape)
+
+
 votes_table = filter_votes()
 table_to_plot = create_table_to_plot(voting_table=voting_table, votes_table=votes_table)
 
@@ -155,7 +138,7 @@ csv = table_to_plot.to_csv(index=False).encode('utf-8')
 st.download_button(
    "Cliquez pour télécharger",
    csv,
-   f"votes_{datetime.today().strftime('%Y-%m-%d%H:%M:%S')}.csv",
+   f"votes_{datetime.datetime.today().strftime('%Y-%m-%d%H:%M:%S')}.csv",
    mime="text/csv",
    key='download-csv'
 )
