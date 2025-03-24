@@ -26,15 +26,14 @@ rubriques_rsge = rsge[["Rubrique", "Intitulé rubrique"]].drop_duplicates(["Rubr
 clean_persons = load_data(PERSON_CSV)
 clean_persons = clean_persons[clean_persons["person_external_id"].isin(clean_votes["vote_person_external_id"])]
 clean_persons_parties = clean_persons.drop_duplicates(["person_party_fr"])["person_party_fr"].sort_values()
-clean_persons_metiers = clean_persons.drop_duplicates(["person_occupation_fr"])["person_occupation_fr"].sort_values()
+# clean_persons_metiers = clean_persons.drop_duplicates(["person_occupation_fr"])["person_occupation_fr"].sort_values()
 clean_persons_genres = clean_persons.drop_duplicates(["person_gender"])["person_gender"].sort_values()
 
-
-def prepare_data() -> pd.DataFrame:
+def filter_voting() -> pd.DataFrame:
     min_date = pl_voting_clean["voting_date"].min()
     max_date = pl_voting_clean["voting_date"].max()
     
-    st.sidebar.header("Filters")
+    st.sidebar.header("Filtrez")
     st.sidebar.subheader("Votes")
 
     selected_dates: tuple[datetime.date] = st.sidebar.date_input("Select dates", [min_date, max_date], min_value=min_date, max_value=max_date)
@@ -47,14 +46,7 @@ def prepare_data() -> pd.DataFrame:
     chapitre_names = pl_voting_clean.loc[pl_voting_clean["Intitulé rubrique"].isin(selected_rubriques)]["Intitulé chapitre"].unique()
     selected_chapitre: list[str] = st.sidebar.multiselect("Selectionnez les chapitres", 
                                                          options=chapitre_names)
-    
-    st.sidebar.subheader("Député.e.s")
-    selected_parties: list[str] = st.sidebar.multiselect("Selectionnez les partis", 
-                                                           options=clean_persons_parties)
-    selected_metiers: list[str] = st.sidebar.multiselect("Selectionnez les métiers", 
-                                                           options=clean_persons_metiers)    
-    selected_genre: list[str] = st.sidebar.multiselect("Selectionnez le genre", 
-                                                           options=clean_persons_genres)
+
     filtered_df = pl_voting_clean.copy()
     try:
         filtered_df = filtered_df[filtered_df["voting_date"].between(selected_dates[0], selected_dates[1])]
@@ -68,8 +60,32 @@ def prepare_data() -> pd.DataFrame:
     if selected_chapitre != []:
         filtered_df = filtered_df[filtered_df["Intitulé chapitre"].isin(selected_chapitre)]
 
+    return filtered_df
+
+
+def filter_votes() -> pd.DataFrame:
+    
+    st.sidebar.subheader("Député.e.s")
+    selected_parties: list[str] = st.sidebar.multiselect("Selectionnez les partis", 
+                                                           options=clean_persons_parties)
+    selected_genre: list[str] = st.sidebar.multiselect("Selectionnez le genre", 
+                                                           options=clean_persons_genres)
+    
+    filtered_df = clean_persons.copy()
+
+    if selected_parties != []:
+        filtered_df = filtered_df[filtered_df["person_party_fr"].isin(selected_parties)]
+    if selected_genre != []:
+        filtered_df = filtered_df[filtered_df["person_gender"].isin(selected_genre)]
+
+    return clean_votes[clean_votes["vote_person_external_id"].isin(filtered_df["person_external_id"])]
+ 
+
+    
+def create_table_to_plot(voting_table: pd.DataFrame, votes_table: pd.DataFrame) -> pd.DataFrame:
+
     title_what = "voting_title_fr" #"voting_external_id" #  
-    full_table = filtered_df.merge(clean_votes, left_on = "voting_external_id", right_on="vote_voting_external_id")
+    full_table = voting_table.merge(votes_table, left_on = "voting_external_id", right_on="vote_voting_external_id")
     short_test = full_table.sort_values(by = "voting_date").loc[:,[title_what, "vote_person_fullname", "vote_label"]]
     table_to_plot = short_test.pivot(columns = title_what, index = "vote_person_fullname", values = "vote_label")
     table_to_plot = table_to_plot.reset_index()  
@@ -123,7 +139,9 @@ def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
         })
     )
 
-table_to_plot = prepare_data()
+voting_table = filter_voting()
+votes_table = filter_votes()
+table_to_plot = create_table_to_plot(voting_table=voting_table, votes_table=votes_table)
 st.write(table_to_plot.shape)
 
 @st.cache_data
