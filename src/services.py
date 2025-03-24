@@ -1,25 +1,20 @@
 import datetime
 import pandas as pd
+import streamlit as st
 
 def filter_voting(voting_table: pd.DataFrame,
                   selected_rubriques: list[str], 
+                  selected_chapitre: list[str],
                   selected_dates: tuple[datetime.date]) -> pd.DataFrame:
+    
     selected_dates: tuple[datetime.datetime] = (pd.to_datetime(selected_dates[0]), pd.to_datetime(selected_dates[1]))
-
-
-
-
-    chapitre_names = voting_table.loc[voting_table["Intitulé rubrique"].isin(selected_rubriques)]["Intitulé chapitre"].unique()
-    selected_chapitre = []
-    # selected_chapitre: list[str] = st.sidebar.multiselect("Selectionnez les chapitres", 
-    #                                                      options=chapitre_names)
 
     filtered_df = voting_table.copy()
     try:
         filtered_df = filtered_df[filtered_df["voting_date"].between(selected_dates[0], selected_dates[1],inclusive="both")]
 
     except:
-        # st.error("Please select start date and end date")
+        st.error("Please select start date and end date")
         return
 
     if selected_rubriques != []:

@@ -37,6 +37,10 @@ st.sidebar.subheader("Votes")
 
 selector_rubriques: list[str] = st.sidebar.multiselect("Selectionnez les rubriques",
                                                            options=rubriques_rsge["Intitulé rubrique"])
+
+chapitre_names = pl_voting_clean.loc[pl_voting_clean["Intitulé rubrique"].isin(selector_rubriques)]["Intitulé chapitre"].unique()
+selector_chapitre: list[str] = st.sidebar.multiselect("Selectionnez les chapitres", 
+                                                      options=chapitre_names)
 min_date = pl_voting_clean["voting_date"].min()
 max_date = pl_voting_clean["voting_date"].max() + datetime.timedelta(days=1)
 
@@ -122,10 +126,9 @@ def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
         })
     )
 voting_table = filter_voting(voting_table= pl_voting_clean,
-                              selected_rubriques = selector_rubriques, 
+                             selected_rubriques = selector_rubriques, 
+                             selected_chapitre= selector_chapitre,
                              selected_dates = selector_dates)
-st.write(voting_table.shape)
-
 
 votes_table = filter_votes()
 table_to_plot = create_table_to_plot(voting_table=voting_table, votes_table=votes_table)
