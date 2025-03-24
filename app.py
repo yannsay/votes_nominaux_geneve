@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from great_tables import GT, html
+
 st.set_page_config(layout="wide")
 
 st.title('Vote nominaux du Grand Conseil de Genève')
@@ -29,19 +30,22 @@ clean_persons_parties = clean_persons.drop_duplicates(["person_party_fr"])["pers
 # clean_persons_metiers = clean_persons.drop_duplicates(["person_occupation_fr"])["person_occupation_fr"].sort_values()
 clean_persons_genres = clean_persons.drop_duplicates(["person_gender"])["person_gender"].sort_values()
 
-def filter_voting() -> pd.DataFrame:
+st.sidebar.header("Filtrez")
+st.sidebar.subheader("Votes")
+
+selector_rubriques: list[str] = st.sidebar.multiselect("Selectionnez les rubriques",
+                                                           options=rubriques_rsge["Intitulé rubrique"])
+# Filter votes
+
+def filter_voting(selected_rubriques: list[str]) -> pd.DataFrame:
     min_date = pl_voting_clean["voting_date"].min()
     max_date = pl_voting_clean["voting_date"].max()
     
-    st.sidebar.header("Filtrez")
-    st.sidebar.subheader("Votes")
+
 
     selected_dates: tuple[datetime.date] = st.sidebar.date_input("Select dates", [min_date, max_date], min_value=min_date, max_value=max_date)
     selected_dates: tuple[datetime.datetime] = (pd.to_datetime(selected_dates[0]), pd.to_datetime(selected_dates[1]))
 
-
-    selected_rubriques: list[str] = st.sidebar.multiselect("Selectionnez les rubriques", 
-                                                           options=rubriques_rsge["Intitulé rubrique"])
 
     chapitre_names = pl_voting_clean.loc[pl_voting_clean["Intitulé rubrique"].isin(selected_rubriques)]["Intitulé chapitre"].unique()
     selected_chapitre: list[str] = st.sidebar.multiselect("Selectionnez les chapitres", 
@@ -106,7 +110,8 @@ def plot_votes(data_to_plot: pd.DataFrame) -> str:
     )
 
 def create_info_table(data_to_plot: pd.DataFrame) -> pd.DataFrame:
-    filtered_voting = pl_voting_clean[pl_voting_clean["voting_title_fr"].isin(data_to_plot.columns)]
+    filtered_voting = pl_voting_clean.copy()
+    filtered_voting = filtered_voting[filtered_voting["voting_title_fr"].isin(data_to_plot.columns)]
     filtered_voting["lien_grand_conseil"] = "https://ge.ch/grandconseil/m/search?search=" + filtered_voting["voting_title_fr"]
     filtered_voting["lien_grand_conseil"] = filtered_voting["lien_grand_conseil"].str.replace(" ", "%20")
     columns_to_keep = ["voting_affair_number", "voting_date","voting_title_fr","voting_affair_title_fr", "lien_grand_conseil", "voting_results_yes", "voting_results_no", "voting_results_abstention","type_vote", "Référence", "Intitulé rubrique", "Intitulé chapitre", "Intitulé"]
@@ -138,17 +143,14 @@ def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
             links_column: "10%"
         })
     )
-
-voting_table = filter_voting()
+voting_table = filter_voting(selected_rubriques=selector_rubriques)
 votes_table = filter_votes()
 table_to_plot = create_table_to_plot(voting_table=voting_table, votes_table=votes_table)
+
 st.write(table_to_plot.shape)
 
-@st.cache_data
-def convert_df(df):
-   return df.to_csv(index=False).encode('utf-8')
 
-csv = convert_df(table_to_plot)
+csv = table_to_plot.to_csv(index=False).encode('utf-8')
 
 st.download_button(
    "Cliquez pour télécharger",

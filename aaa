@@ -1,6 +1,24 @@
-voting_title_fr
-voting_external_id
-voting_affair_title_fr
 
-"https://ge.ch/grandconseil/m/search?search=" + voting_title_fr
-#https://ge.ch/grandconseil/m/search?search=PL+13407-A%2C+vote+nominal+%3A+3e+d%C3%A9bat
+import streamlit as st
+import pandas as pd
+
+# Create DataFrames in your app
+df1 = pd.DataFrame([1, 2, 3])
+df2 = pd.DataFrame([4, 5, 6])
+
+# Display with keys
+st.dataframe(df1, key="first_df")
+st.dataframe(df2, key="second_df")
+
+from streamlit.testing.v1 import AppTest
+
+at = AppTest.from_file("your_app.py")
+at.run()
+
+# Access by key
+first_df = at.dataframe(key="first_df").value
+second_df = at.dataframe(key="second_df").value
+
+# Check shapes
+assert first_df.shape == (3, 1)
+assert second_df.shape == (3, 1)
