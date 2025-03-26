@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 from great_tables import GT
 
-from src.services import filter_voting, filter_votes, create_table_to_plot
+from src.services import filter_voting, filter_votes, create_table_to_plot, plot_votes, plot_voting
 
 st.set_page_config(layout="wide")
 
@@ -64,19 +64,6 @@ selector_genre: list[str] = st.sidebar.multiselect("Selectionnez le genre",
                                                    options=clean_persons_genres)
 
 
-def plot_votes(data_to_plot: pd.DataFrame) -> str:
-    votes_columns = data_to_plot.columns[1:].to_list()
-    return (
-        GT(data_to_plot)
-        .data_color(
-            columns=votes_columns,
-            palette=["#004D40", "#D81B60", "#FFC107"],
-            domain=["Oui", "Non", "Abstention"],
-            na_color="white"
-        )
-    )
-
-
 def create_info_table(data_to_plot: pd.DataFrame) -> pd.DataFrame:
     filtered_voting = pl_voting_clean.copy()
     filtered_voting = filtered_voting[filtered_voting["voting_title_fr"].isin(
@@ -105,20 +92,6 @@ def create_info_table(data_to_plot: pd.DataFrame) -> pd.DataFrame:
     return clean_voting
 
 
-def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
-    data_to_plot[links_column] = "[" + data_to_plot[links_column] + \
-        "](" + data_to_plot[links_column] + ")"
-    # votes_columns = data_to_plot.columns[1:].to_list()
-    return (
-        GT(data_to_plot)
-        .fmt_markdown(columns=links_column)
-        .cols_width(
-            cases={
-                links_column: "10%"
-            })
-    )
-
-
 voting_table = filter_voting(voting_table=pl_voting_clean,
                              selected_rubriques=selector_rubriques,
                              selected_chapitre=selector_chapitre,
@@ -128,30 +101,25 @@ votes_table = filter_votes(votes_table=clean_votes,
                            persons_table=clean_persons,
                            selected_parties=selector_parties,
                            selected_genre=selector_genre)
-st.write(votes_table.shape)
 
 table_to_plot = create_table_to_plot(
     voting_table=voting_table, votes_table=votes_table)
 
-st.write(table_to_plot.shape)
-
-
-csv = table_to_plot.to_csv(index=False).encode('utf-8')
-
-st.download_button(
-    "Cliquez pour télécharger",
-    csv,
-    f"votes_{datetime.datetime.today().strftime('%Y-%m-%d%H:%M:%S')}.csv",
-    mime="text/csv",
-    key='download-csv'
-)
-
 with st.container(height=600, key="table_votes"):
-    st.write(plot_votes(table_to_plot).as_raw_html(), unsafe_allow_html=True)
-
+    st.write(plot_votes(table_to_plot), unsafe_allow_html=True)
 
 with st.container(height=600, key="table_votings"):
     voting_table_to_plot = create_info_table(table_to_plot)
-    # st.write(voting_table_to_plot)
     st.write(plot_voting(voting_table_to_plot,
-             "Lien Grand Conseil").as_raw_html(), unsafe_allow_html=True)
+             "Lien Grand Conseil"), unsafe_allow_html=True)
+
+
+# csv = table_to_plot.to_csv(index=False).encode('utf-8')
+
+# st.download_button(
+#     "Cliquez pour télécharger",
+#     csv,
+#     f"votes_{datetime.datetime.today().strftime('%Y-%m-%d%H:%M:%S')}.csv",
+#     mime="text/csv",
+#     key='download-csv'
+# )

@@ -2,7 +2,7 @@
 import datetime
 import pandas as pd
 import streamlit as st
-
+from great_tables import GT
 
 def filter_voting(voting_table: pd.DataFrame,
                   selected_rubriques: list[str],
@@ -76,16 +76,55 @@ def create_table_to_plot(voting_table: pd.DataFrame,
     return table_to_plot
 
 
-if __name__ == '__main__':
-    import os
-    VOTING_CSV = os.path.join(os.path.dirname(
-        __file__), '..', 'outputs', 'pl_voting_clean.csv')
-    pl_voting_clean = pd.read_csv(VOTING_CSV)
-    pl_voting_clean["voting_date"] = pd.to_datetime(
-        pl_voting_clean["voting_date"])
 
-    datesss = (datetime.date(2023, 5, 11), datetime.date(2025, 1, 31))
-    print(filter_voting(voting_table=pl_voting_clean,
-                        selected_rubriques=[],
-                        selected_dates=datesss
-                        ))
+
+
+# def create_info_table(data_to_plot: pd.DataFrame) -> pd.DataFrame:
+#     filtered_voting = pl_voting_clean.copy()
+#     filtered_voting = filtered_voting[filtered_voting["voting_title_fr"].isin(
+#         data_to_plot.columns)]
+#     filtered_voting["lien_grand_conseil"] = "https://ge.ch/grandconseil/m/search?search=" + \
+#         filtered_voting["voting_title_fr"]
+#     filtered_voting["lien_grand_conseil"] = filtered_voting["lien_grand_conseil"].str.replace(
+#         " ", "%20")
+#     columns_to_keep = ["voting_affair_number", "voting_date", "voting_title_fr", "voting_affair_title_fr", "lien_grand_conseil", "voting_results_yes",
+#                        "voting_results_no", "voting_results_abstention", "type_vote", "Référence", "Intitulé rubrique", "Intitulé chapitre", "Intitulé"]
+#     clean_voting = filtered_voting.loc[:, columns_to_keep]
+
+#     dictionnaire_name = {"voting_affair_number": "Identifiant affaire",
+#                          "voting_date": "Date du vote",
+#                          "voting_title_fr": "Titre du vote",
+#                          "voting_affair_title_fr": "Titre affaire",
+#                          "lien_grand_conseil": "Lien Grand Conseil",
+#                          "voting_results_yes": "Résultat - Oui",
+#                          "voting_results_no": "Résutlat - Non",
+#                          "voting_results_abstention": "Résultat - Abstention",
+#                          "type_vote": "Type de vote", }
+#     clean_voting = clean_voting.rename(columns=dictionnaire_name)
+#     clean_voting = clean_voting.reset_index()
+#     clean_voting = clean_voting.drop(columns="index")
+
+#     return clean_voting
+
+def plot_votes(data_to_plot: pd.DataFrame) -> str:
+    votes_columns = data_to_plot.columns[1:].to_list()
+    return (GT(data_to_plot)\
+        .data_color(
+            columns=votes_columns,
+            palette=["#004D40", "#D81B60", "#FFC107"],
+            domain=["Oui", "Non", "Abstention"],
+            na_color="white"
+        ).as_raw_html())
+
+def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
+    data_to_plot[links_column] = "[" + data_to_plot[links_column] + "](" + data_to_plot[links_column] + ")"
+    # votes_columns = data_to_plot.columns[1:].to_list()
+    return (
+        GT(data_to_plot)
+        .fmt_markdown(columns=links_column)
+        .cols_width(
+            cases={
+                links_column: "10%"
+            }).as_raw_html()
+    )
+    
