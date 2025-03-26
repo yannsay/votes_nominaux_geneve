@@ -127,4 +127,34 @@ def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
                 links_column: "10%"
             }).as_raw_html()
     )
+
+def create_info_table(voting_table: pd.DataFrame,
+                      data_to_plot: pd.DataFrame) -> pd.DataFrame:
+    filtered_voting = voting_table.copy()
+    filtered_voting = filtered_voting[filtered_voting["voting_title_fr"].isin(
+        data_to_plot.columns)]
+    filtered_voting["lien_grand_conseil"] = "https://ge.ch/grandconseil/m/search?search=" + \
+        filtered_voting["voting_title_fr"]
+    filtered_voting["lien_grand_conseil"] = filtered_voting["lien_grand_conseil"].str.replace(
+        " ", "%20")
+    columns_to_keep = ["voting_affair_number", "voting_date", "voting_title_fr", "voting_affair_title_fr", "lien_grand_conseil", "voting_results_yes",
+                       "voting_results_no", "voting_results_abstention", "type_vote", "Référence", "Intitulé rubrique", "Intitulé chapitre", "Intitulé"]
+    clean_voting = filtered_voting.loc[:, columns_to_keep]
+
+    dictionnaire_name = {"voting_affair_number": "Identifiant affaire",
+                         "voting_date": "Date du vote",
+                         "voting_title_fr": "Titre du vote",
+                         "voting_affair_title_fr": "Titre affaire",
+                         "lien_grand_conseil": "Lien Grand Conseil",
+                         "voting_results_yes": "Résultat - Oui",
+                         "voting_results_no": "Résutlat - Non",
+                         "voting_results_abstention": "Résultat - Abstention",
+                         "type_vote": "Type de vote", }
+    clean_voting = clean_voting.rename(columns=dictionnaire_name)
+    clean_voting = clean_voting.reset_index()
+    clean_voting = clean_voting.drop(columns="index")
+
+    return clean_voting
+
+
     

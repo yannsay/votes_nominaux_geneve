@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 from great_tables import GT
 
-from src.services import filter_voting, filter_votes, create_table_to_plot, plot_votes, plot_voting
+from src.services import *
 
 st.set_page_config(layout="wide")
 
@@ -48,6 +48,7 @@ chapitre_names = pl_voting_clean.loc[pl_voting_clean["Intitulé rubrique"].isin(
     selector_rubriques)]["Intitulé chapitre"].unique()
 selector_chapitre: list[str] = st.sidebar.multiselect("Selectionnez les chapitres",
                                                       options=chapitre_names)
+
 min_date = pl_voting_clean["voting_date"].min()
 max_date = pl_voting_clean["voting_date"].max() + datetime.timedelta(days=1)
 
@@ -62,35 +63,6 @@ selector_parties: list[str] = st.sidebar.multiselect("Selectionnez les partis",
                                                      options=clean_persons_parties)
 selector_genre: list[str] = st.sidebar.multiselect("Selectionnez le genre",
                                                    options=clean_persons_genres)
-
-
-def create_info_table(data_to_plot: pd.DataFrame) -> pd.DataFrame:
-    filtered_voting = pl_voting_clean.copy()
-    filtered_voting = filtered_voting[filtered_voting["voting_title_fr"].isin(
-        data_to_plot.columns)]
-    filtered_voting["lien_grand_conseil"] = "https://ge.ch/grandconseil/m/search?search=" + \
-        filtered_voting["voting_title_fr"]
-    filtered_voting["lien_grand_conseil"] = filtered_voting["lien_grand_conseil"].str.replace(
-        " ", "%20")
-    columns_to_keep = ["voting_affair_number", "voting_date", "voting_title_fr", "voting_affair_title_fr", "lien_grand_conseil", "voting_results_yes",
-                       "voting_results_no", "voting_results_abstention", "type_vote", "Référence", "Intitulé rubrique", "Intitulé chapitre", "Intitulé"]
-    clean_voting = filtered_voting.loc[:, columns_to_keep]
-
-    dictionnaire_name = {"voting_affair_number": "Identifiant affaire",
-                         "voting_date": "Date du vote",
-                         "voting_title_fr": "Titre du vote",
-                         "voting_affair_title_fr": "Titre affaire",
-                         "lien_grand_conseil": "Lien Grand Conseil",
-                         "voting_results_yes": "Résultat - Oui",
-                         "voting_results_no": "Résutlat - Non",
-                         "voting_results_abstention": "Résultat - Abstention",
-                         "type_vote": "Type de vote", }
-    clean_voting = clean_voting.rename(columns=dictionnaire_name)
-    clean_voting = clean_voting.reset_index()
-    clean_voting = clean_voting.drop(columns="index")
-
-    return clean_voting
-
 
 voting_table = filter_voting(voting_table=pl_voting_clean,
                              selected_rubriques=selector_rubriques,
@@ -109,7 +81,8 @@ with st.container(height=600, key="table_votes"):
     st.write(plot_votes(table_to_plot), unsafe_allow_html=True)
 
 with st.container(height=600, key="table_votings"):
-    voting_table_to_plot = create_info_table(table_to_plot)
+    #voting_table_to_plot = create_info_table(table_to_plot)
+    voting_table_to_plot = create_info_table(voting_table = pl_voting_clean, data_to_plot = table_to_plot)
     st.write(plot_voting(voting_table_to_plot,
              "Lien Grand Conseil"), unsafe_allow_html=True)
 
