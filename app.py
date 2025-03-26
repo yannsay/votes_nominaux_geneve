@@ -8,17 +8,16 @@ from src.repository import AppDatabase
 
 app_database = AppDatabase()
 
-
 st.title('Vote nominaux du Grand Conseil de Genève')
 
 st.sidebar.header("Filtrez")
 st.sidebar.subheader("Votes")
-
 selector_rubriques: list[str] = st.sidebar.multiselect("Selectionnez les rubriques",
                                                        options=app_database.rubriques_rsge)
 
 chapitre_names = app_database.clean_voting.loc[app_database.clean_voting["Intitulé rubrique"].isin(
     selector_rubriques)]["Intitulé chapitre"].unique()
+
 selector_chapitre: list[str] = st.sidebar.multiselect("Selectionnez les chapitres",
                                                       options=chapitre_names)
 
