@@ -17,9 +17,9 @@ VOTING_CSV = os.path.join(os.path.dirname(
 
 class TestServices(unittest.TestCase):
     def setUp(self):
-        self.pl_voting_clean = pd.read_csv(VOTING_CSV)
-        self.pl_voting_clean["voting_date"] = pd.to_datetime(
-            self.pl_voting_clean["voting_date"])
+        self.votings_clean = pd.read_csv(VOTING_CSV)
+        self.votings_clean["voting_date"] = pd.to_datetime(
+            self.votings_clean["voting_date"])
         self.initial_dates = (datetime.date(2023, 5, 11),
                               datetime.date(2025, 2, 28))
         self.votes_clean = pd.read_csv(VOTES_CSV)
@@ -29,30 +29,30 @@ class TestServices(unittest.TestCase):
         """
         Test function filter_voting
         """
-        self.assertEqual(filter_voting(voting_table=self.pl_voting_clean,
+        self.assertEqual(filter_voting(voting_table=self.votings_clean,
                                        selected_rubriques=[],
                                        selected_chapitre=[],
                                        selected_dates=self.initial_dates).shape,
                          (82, 18))
-        self.assertEqual(filter_voting(voting_table=self.pl_voting_clean,
+        self.assertEqual(filter_voting(voting_table=self.votings_clean,
                                        selected_rubriques=["Police"],
                                        selected_chapitre=[],
                                        selected_dates=self.initial_dates).shape,
                          (1, 18))
-        self.assertEqual(filter_voting(voting_table=self.pl_voting_clean,
+        self.assertEqual(filter_voting(voting_table=self.votings_clean,
                                        selected_rubriques=[
                                            "Structure cantonale et principes fondamentaux"],
                                        selected_chapitre=[],
                                        selected_dates=self.initial_dates).shape,
                          (8, 18))
-        self.assertEqual(filter_voting(voting_table=self.pl_voting_clean,
+        self.assertEqual(filter_voting(voting_table=self.votings_clean,
                                        selected_rubriques=[],
                                        selected_chapitre=[],
                                        selected_dates=(datetime.date(
                                            2023, 5, 11), datetime.date(2023, 5, 31))
                                        ).shape,
                          (4, 18))
-        self.assertEqual(filter_voting(voting_table=self.pl_voting_clean,
+        self.assertEqual(filter_voting(voting_table=self.votings_clean,
                                        selected_rubriques=[
                                            "Structure cantonale et principes fondamentaux"],
                                        selected_chapitre=[
@@ -90,7 +90,7 @@ class TestServices(unittest.TestCase):
         """
         Test function create_table_to_plot
         """
-        filter_votings_test1 = filter_voting(self.pl_voting_clean,
+        filter_votings_test1 = filter_voting(self.votings_clean,
                                              selected_rubriques=[],
                                              selected_chapitre=[],
                                              selected_dates=self.initial_dates)
@@ -102,7 +102,7 @@ class TestServices(unittest.TestCase):
                                               votes_table=filter_votes_test1).shape,
                          (124, 83))
 
-        filter_votings_test2 = filter_voting(self.pl_voting_clean,
+        filter_votings_test2 = filter_voting(self.votings_clean,
                                              selected_rubriques=["Police"],
                                              selected_chapitre=[],
                                              selected_dates=self.initial_dates)
@@ -114,7 +114,7 @@ class TestServices(unittest.TestCase):
                                               votes_table=filter_votes_test2).shape,
                          (85, 2))
 
-        filter_votings_test3 = filter_voting(self.pl_voting_clean,
+        filter_votings_test3 = filter_voting(self.votings_clean,
                                              selected_rubriques=[],
                                              selected_chapitre=[],
                                              selected_dates=self.initial_dates)
@@ -126,7 +126,7 @@ class TestServices(unittest.TestCase):
                                               votes_table=filter_votes_test3).shape,
                          (37, 83))
 
-        filter_votings_test4 = filter_voting(self.pl_voting_clean,
+        filter_votings_test4 = filter_voting(self.votings_clean,
                                              selected_rubriques=[
                                                  "Structure cantonale et principes fondamentaux"],
                                              selected_chapitre=[],
@@ -143,7 +143,7 @@ class TestServices(unittest.TestCase):
         """
         Test function create_info_table
         """
-        filter_votings_test1 = filter_voting(self.pl_voting_clean,
+        filter_votings_test1 = filter_voting(self.votings_clean,
                                              selected_rubriques=[],
                                              selected_chapitre=[],
                                              selected_dates=self.initial_dates)
@@ -153,11 +153,11 @@ class TestServices(unittest.TestCase):
                                           selected_genre=[])
         data_to_plot_test1 = create_table_to_plot(voting_table=filter_votings_test1,
                                               votes_table=filter_votes_test1)
-        self.assertEqual(create_info_table(voting_table = self.pl_voting_clean, 
+        self.assertEqual(create_info_table(voting_table = self.votings_clean, 
                                            data_to_plot = data_to_plot_test1).shape,
                          (82, 13))
 
-        filter_votings_test2 = filter_voting(self.pl_voting_clean,
+        filter_votings_test2 = filter_voting(self.votings_clean,
                                              selected_rubriques=["Santé"],
                                              selected_chapitre=[],
                                              selected_dates=self.initial_dates)
@@ -167,11 +167,11 @@ class TestServices(unittest.TestCase):
                                           selected_genre=[])
         data_to_plot_test2 = create_table_to_plot(voting_table=filter_votings_test2,
                                               votes_table=filter_votes_test2)
-        self.assertEqual(create_info_table(voting_table = self.pl_voting_clean, 
+        self.assertEqual(create_info_table(voting_table = self.votings_clean, 
                                            data_to_plot = data_to_plot_test2).shape,
                          (3, 13))
 
-        filter_votings_test2 = filter_voting(self.pl_voting_clean,
+        filter_votings_test2 = filter_voting(self.votings_clean,
                                              selected_rubriques=["Organisation du canton"],
                                              selected_chapitre=["Pouvoirs législatif et exécutif"],
                                              selected_dates=self.initial_dates)
@@ -181,11 +181,11 @@ class TestServices(unittest.TestCase):
                                           selected_genre=[])
         data_to_plot_test2 = create_table_to_plot(voting_table=filter_votings_test2,
                                               votes_table=filter_votes_test2)
-        self.assertEqual(create_info_table(voting_table = self.pl_voting_clean, 
+        self.assertEqual(create_info_table(voting_table = self.votings_clean, 
                                            data_to_plot = data_to_plot_test2).shape,
                          (6, 13))
 
-        filter_votings_test2 = filter_voting(self.pl_voting_clean,
+        filter_votings_test2 = filter_voting(self.votings_clean,
                                              selected_rubriques=[],
                                              selected_chapitre=[],
                                              selected_dates=(datetime.date(2023, 5, 11), datetime.date(2023, 5, 31)))
@@ -195,7 +195,7 @@ class TestServices(unittest.TestCase):
                                           selected_genre=[])
         data_to_plot_test2 = create_table_to_plot(voting_table=filter_votings_test2,
                                               votes_table=filter_votes_test2)
-        self.assertEqual(create_info_table(voting_table = self.pl_voting_clean, 
+        self.assertEqual(create_info_table(voting_table = self.votings_clean, 
                                            data_to_plot = data_to_plot_test2).shape,
                          (4, 13))
 

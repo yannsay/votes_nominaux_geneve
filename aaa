@@ -1,24 +1,8 @@
+when running test on repository 
+2025-03-26 16:07:12.960 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
 
-import streamlit as st
-import pandas as pd
+https://discuss.streamlit.io/t/how-to-suppress-warning-during-direct-python-running/11557
+showWarningOnDirectExecution = false
 
-# Create DataFrames in your app
-df1 = pd.DataFrame([1, 2, 3])
-df2 = pd.DataFrame([4, 5, 6])
 
-# Display with keys
-st.dataframe(df1, key="first_df")
-st.dataframe(df2, key="second_df")
-
-from streamlit.testing.v1 import AppTest
-
-at = AppTest.from_file("your_app.py")
-at.run()
-
-# Access by key
-first_df = at.dataframe(key="first_df").value
-second_df = at.dataframe(key="second_df").value
-
-# Check shapes
-assert first_df.shape == (3, 1)
-assert second_df.shape == (3, 1)
+change git repo
