@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 from great_tables import GT
 
-from src.services import filter_voting
+from src.services import filter_voting, filter_votes
 
 st.set_page_config(layout="wide")
 
@@ -49,35 +49,14 @@ selector_dates: tuple[datetime.date] = st.sidebar.date_input("Select dates",
                                                              min_value=min_date, 
                                                              max_value=max_date)
 
-def filter_votes() -> pd.DataFrame:
-    
-    st.sidebar.subheader("Député.e.s")
-    selected_parties: list[str] = st.sidebar.multiselect("Selectionnez les partis", 
-                                                           options=clean_persons_parties)
-    selected_genre: list[str] = st.sidebar.multiselect("Selectionnez le genre", 
+st.sidebar.subheader("Député.e.s")
+
+selector_parties: list[str] = st.sidebar.multiselect("Selectionnez les partis", 
+                                                       options=clean_persons_parties)
+selector_genre: list[str] = st.sidebar.multiselect("Selectionnez le genre", 
                                                            options=clean_persons_genres)
     
-    filtered_df = clean_persons.copy()
 
-    if selected_parties != []:
-        filtered_df = filtered_df[filtered_df["person_party_fr"].isin(selected_parties)]
-    if selected_genre != []:
-        filtered_df = filtered_df[filtered_df["person_gender"].isin(selected_genre)]
-
-    return clean_votes[clean_votes["vote_person_external_id"].isin(filtered_df["person_external_id"])]
- 
-
-    
-def create_table_to_plot(voting_table: pd.DataFrame, votes_table: pd.DataFrame) -> pd.DataFrame:
-
-    title_what = "voting_title_fr" #"voting_external_id" #  
-    full_table = voting_table.merge(votes_table, left_on = "voting_external_id", right_on="vote_voting_external_id")
-    short_test = full_table.sort_values(by = "voting_date").loc[:,[title_what, "vote_person_fullname", "vote_label"]]
-    table_to_plot = short_test.pivot(columns = title_what, index = "vote_person_fullname", values = "vote_label")
-    table_to_plot = table_to_plot.reset_index()  
-    table_to_plot = table_to_plot.rename(columns={'vote_person_fullname': 'Député.e'})
-
-    return table_to_plot
 
 def plot_votes(data_to_plot: pd.DataFrame) -> str:
     votes_columns = data_to_plot.columns[1:].to_list()
@@ -130,7 +109,12 @@ voting_table = filter_voting(voting_table= pl_voting_clean,
                              selected_chapitre= selector_chapitre,
                              selected_dates = selector_dates)
 
-votes_table = filter_votes()
+votes_table = filter_votes(votes_table=clean_votes, 
+                           persons_table=clean_persons, 
+                           selected_parties=selector_parties, 
+                           selected_genre=selector_genre)
+st.write(votes_table.shape)
+
 table_to_plot = create_table_to_plot(voting_table=voting_table, votes_table=votes_table)
 
 st.write(table_to_plot.shape)
