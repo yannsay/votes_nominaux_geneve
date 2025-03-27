@@ -6,3 +6,7 @@ showWarningOnDirectExecution = false
 
 
 change git repo
+
+
+docker build -t gc_geneve_votes .
+docker run --name gc_geneve_votes -d -p 8080:8501 gc_geneve_votes
