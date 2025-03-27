@@ -67,24 +67,34 @@ class TestServices(unittest.TestCase):
         """
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
+                                      selected_persons = [],
                                       selected_parties=[],
                                       selected_genre=[]).shape,
                          (35455, 7))
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
+                                      selected_persons = [],
                                       selected_parties=["S"],
                                       selected_genre=[]).shape,
                          (6326, 7))
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
+                                      selected_persons = [],
                                       selected_parties=["S", "Ve"],
                                       selected_genre=[]).shape,
                          (11944, 7))
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
+                                      selected_persons = [],
                                       selected_parties=[],
                                       selected_genre=["f"]).shape,
                          (11041, 7))
+        self.assertEqual(filter_votes(votes_table=self.votes_clean,
+                                      persons_table=self.persons_clean,
+                                      selected_persons = ["Ana Roch"],
+                                      selected_parties=[],
+                                      selected_genre=[]).shape,
+                         (365, 7))
 
     def test_create_table_to_plot(self):
         """
@@ -96,6 +106,7 @@ class TestServices(unittest.TestCase):
                                              selected_dates=self.initial_dates)
         filter_votes_test1 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=[],
                                           selected_genre=[])
         self.assertEqual(create_table_to_plot(voting_table=filter_votings_test1,
@@ -108,6 +119,7 @@ class TestServices(unittest.TestCase):
                                              selected_dates=self.initial_dates)
         filter_votes_test2 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=[],
                                           selected_genre=[])
         self.assertEqual(create_table_to_plot(voting_table=filter_votings_test2,
@@ -120,6 +132,7 @@ class TestServices(unittest.TestCase):
                                              selected_dates=self.initial_dates)
         filter_votes_test3 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=[],
                                           selected_genre=["f"])
         self.assertEqual(create_table_to_plot(voting_table=filter_votings_test3,
@@ -133,12 +146,25 @@ class TestServices(unittest.TestCase):
                                              selected_dates=self.initial_dates)
         filter_votes_test4 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=["S"],
                                           selected_genre=[])
         self.assertEqual(create_table_to_plot(voting_table=filter_votings_test4,
                                               votes_table=filter_votes_test4).shape,
                          (20, 9))
         
+        filter_votings_test5 = filter_voting(self.votings_clean,
+                                             selected_rubriques=[],
+                                             selected_chapitre=[],
+                                             selected_dates=self.initial_dates)
+        filter_votes_test5 = filter_votes(votes_table=self.votes_clean,
+                                          persons_table=self.persons_clean,
+                                          selected_persons = ["Ana Roch"],
+                                          selected_parties=[],
+                                          selected_genre=[])
+        self.assertEqual(create_table_to_plot(voting_table=filter_votings_test5,
+                                              votes_table=filter_votes_test5).shape,
+                         (1, 78))        
     def test_create_info_table(self):
         """
         Test function create_info_table
@@ -149,6 +175,7 @@ class TestServices(unittest.TestCase):
                                              selected_dates=self.initial_dates)
         filter_votes_test1 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=[],
                                           selected_genre=[])
         data_to_plot_test1 = create_table_to_plot(voting_table=filter_votings_test1,
@@ -163,6 +190,7 @@ class TestServices(unittest.TestCase):
                                              selected_dates=self.initial_dates)
         filter_votes_test2 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=[],
                                           selected_genre=[])
         data_to_plot_test2 = create_table_to_plot(voting_table=filter_votings_test2,
@@ -177,6 +205,7 @@ class TestServices(unittest.TestCase):
                                              selected_dates=self.initial_dates)
         filter_votes_test2 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=[],
                                           selected_genre=[])
         data_to_plot_test2 = create_table_to_plot(voting_table=filter_votings_test2,
@@ -191,6 +220,7 @@ class TestServices(unittest.TestCase):
                                              selected_dates=(datetime.date(2023, 5, 11), datetime.date(2023, 5, 31)))
         filter_votes_test2 = filter_votes(votes_table=self.votes_clean,
                                           persons_table=self.persons_clean,
+                                          selected_persons = [],
                                           selected_parties=[],
                                           selected_genre=[])
         data_to_plot_test2 = create_table_to_plot(voting_table=filter_votings_test2,

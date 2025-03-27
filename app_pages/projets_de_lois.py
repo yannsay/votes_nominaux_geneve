@@ -28,7 +28,8 @@ selector_dates: tuple[datetime.date] = st.sidebar.date_input("Select dates",
                                                              max_value=app_database.max_date)
 
 st.sidebar.subheader("Député.e.s")
-
+selector_persons: list[str] = st.sidebar.multiselect("Selectionnez le nom",
+                                                   options=app_database.clean_persons_persons)
 selector_parties: list[str] = st.sidebar.multiselect("Selectionnez les partis",
                                                      options=app_database.clean_persons_parties)
 selector_genre: list[str] = st.sidebar.multiselect("Selectionnez le genre",
@@ -41,9 +42,9 @@ voting_table = filter_voting(voting_table=app_database.clean_voting,
 
 votes_table = filter_votes(votes_table=app_database.clean_votes,
                            persons_table=app_database.clean_persons,
+                           selected_persons = selector_persons,
                            selected_parties=selector_parties,
                            selected_genre=selector_genre)
-
 table_to_plot = create_table_to_plot(
     voting_table=voting_table, votes_table=votes_table)
 

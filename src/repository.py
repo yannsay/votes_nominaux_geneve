@@ -46,7 +46,8 @@ class AppDatabase:
             ["person_party_fr"])["person_party_fr"].sort_values().to_list()
         self.clean_persons_genres = clean_persons.drop_duplicates(
             ["person_gender"])["person_gender"].sort_values().to_list()
-        
+        self.clean_persons_persons = clean_persons.drop_duplicates(
+            ["person_fullname"])["person_fullname"].sort_values().to_list()        
     def set_min_max_dates(self, clean_votings: pd.DataFrame) -> None:
         self.min_date = clean_votings["voting_date"].min()
         self.max_date = clean_votings["voting_date"].max() + datetime.timedelta(days=1)
