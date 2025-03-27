@@ -2,8 +2,8 @@ import streamlit as st
 import datetime
 
 from src.services import *
-st.set_page_config(page_title="Projets de loi",
-                   layout="wide")
+st.set_page_config(layout="wide",
+                   page_title="Vote nominaux par projets de loi")
 
 from src.repository import AppDatabase
 
