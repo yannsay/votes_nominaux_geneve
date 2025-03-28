@@ -4,12 +4,15 @@ import datetime
 
 VOTING_CSV = ('outputs/pl_voting_clean.csv')
 VOTES_CSV = ('outputs/clean_votes.csv')
-RSGE_CSV = ("outputs/reformatted_rsge.csv")
+RSGE_CSV = ("inputs/rsGE.csv")
 PERSON_CSV = ('outputs/clean_persons.csv')
 
 @st.cache_data
 def load_data(csv_path):
-    data = pd.read_csv(csv_path)
+    if csv_path == "inputs/rsGE.csv":
+        data = pd.read_csv(csv_path, sep = ";")
+    else:
+        data = pd.read_csv(csv_path)
     return data
 
 class AppDatabase:
@@ -21,8 +24,6 @@ class AppDatabase:
         self.set_clean_persons_x(clean_persons = self.clean_persons)
         self.set_min_max_dates(clean_votings = self.clean_voting)
 
-
-    
     def set_clean_voting(self, votings_file: str) -> None:
         self.clean_voting = load_data(votings_file)
         self.clean_voting["voting_date"] = pd.to_datetime(self.clean_voting["voting_date"])  
@@ -37,9 +38,26 @@ class AppDatabase:
         
     def set_rubriques_rsge(self, rsge_file: str) -> None:
         rsge = load_data(rsge_file)
-        rubriques_rsge = rsge[["Rubrique", "Intitulé rubrique"]].drop_duplicates(
+        rubriques_mask = rsge["Référence"].str.len() == 1
+        rubriques_rsge = rsge.loc[rubriques_mask]
+        rubriques_rsge = rubriques_rsge.reset_index().drop(columns=["index","Date d’adoption"])
+        rubriques_rsge.columns = ["Rubrique", "Intitulé rubrique"]
+
+        chapitres_mask = (rsge["Référence"].str.len() > 1) & (rsge["Référence"].str.len() <=4)
+        chapitres_rsge = rsge.loc[chapitres_mask]
+        chapitres_rsge = chapitres_rsge.reset_index().drop(columns=["index","Date d’adoption"])
+        chapitres_rsge.columns = ["Chapitre", "Intitulé chapitre"]
+
+        reformatted_rsge = rsge.loc[~(chapitres_mask | rubriques_mask)]
+        reformatted_rsge = reformatted_rsge.loc[~pd.isna(reformatted_rsge["Référence"])]
+        reformatted_rsge = reformatted_rsge.reset_index().drop(columns=["index","Date d’adoption"])
+        reformatted_rsge["Rubrique"] = reformatted_rsge['Référence'].str[0]
+        reformatted_rsge["Chapitre"] = reformatted_rsge['Référence'].str[:3]
+        reformatted_rsge = reformatted_rsge.merge(chapitres_rsge, on= "Chapitre", how="left").merge(rubriques_rsge, on = "Rubrique", how = "left")
+
+        final_rubriques_rsge = reformatted_rsge[["Rubrique", "Intitulé rubrique"]].drop_duplicates(
             ["Rubrique", "Intitulé rubrique"]).sort_values(by=["Rubrique"])
-        self.rubriques_rsge = rubriques_rsge["Intitulé rubrique"].to_list()
+        self.rubriques_rsge = final_rubriques_rsge["Intitulé rubrique"].to_list()
 
     def set_clean_persons_x(self, clean_persons: pd.DataFrame) -> None:
         self.clean_persons_parties = clean_persons.drop_duplicates(
