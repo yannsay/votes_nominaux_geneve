@@ -8,11 +8,9 @@ import datetime
 import unittest
 import pandas as pd
 
-
-VOTES_CSV = ('outputs/clean_votes.csv')
-PERSON_CSV = ('outputs/clean_persons.csv')
-VOTING_CSV = os.path.join(os.path.dirname(
-    __file__), '..', 'outputs', 'pl_voting_clean.csv')
+VOTING_CSV = os.path.join(os.path.dirname(__file__), 'fixtures', 'pl_voting_clean.csv')
+PERSON_CSV = os.path.join(os.path.dirname(__file__), 'fixtures', 'clean_persons.csv')
+VOTES_CSV = os.path.join(os.path.dirname(__file__), 'fixtures', 'clean_votes.csv')
 
 
 class TestServices(unittest.TestCase):

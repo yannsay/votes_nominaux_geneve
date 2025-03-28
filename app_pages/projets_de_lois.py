@@ -51,30 +51,18 @@ votes_table = filter_votes(votes_table=app_database.clean_votes,
                            selected_genre=selector_genre)
 
 ## Create the final table
-table_to_plot = create_table_to_plot(
-    voting_table=voting_table, votes_table=votes_table)
+table_to_plot = create_table_to_plot( voting_table=voting_table, votes_table=votes_table)
 
 ## Plot the final table
-with st.container(height=600, key="table_votes"):
-    st.write(plot_votes(table_to_plot), unsafe_allow_html=True)
+votes_columns = table_to_plot.columns[1:].to_list()
+
+st.dataframe(table_to_plot.style.map(color_picker,palette = palette_votes, subset=votes_columns), 
+             hide_index=True)
 
 st.write("Information en plus")
 ## Create the extra information table
-voting_table_to_plot = create_info_table(voting_table = app_database.clean_voting, data_to_plot = table_to_plot)
-
+info_table_to_plot = create_info_table(voting_table = app_database.clean_voting, 
+                                         data_to_plot = table_to_plot)
 ## Plot the extra information table
-with st.container(height=600, key="table_votings"):
-    #voting_table_to_plot = create_info_table(table_to_plot)
-    st.write(plot_voting(voting_table_to_plot,
-             "Lien Grand Conseil"), unsafe_allow_html=True)
-
-
-# csv = table_to_plot.to_csv(index=False).encode('utf-8')
-
-# st.download_button(
-#     "Cliquez pour télécharger",
-#     csv,
-#     f"votes_{datetime.datetime.today().strftime('%Y-%m-%d%H:%M:%S')}.csv",
-#     mime="text/csv",
-#     key='download-csv'
-# )
+st.dataframe(info_table_to_plot, 
+             column_config={"Lien Grand Conseil": st.column_config.LinkColumn("Lien Grand Conseil")})

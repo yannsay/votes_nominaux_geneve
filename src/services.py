@@ -11,7 +11,6 @@ def filter_voting(voting_table: pd.DataFrame,
     """
     Function to filter the voting table
     """
-
     selected_dates: tuple[datetime.datetime] = (pd.to_datetime(
         selected_dates[0]), pd.to_datetime(selected_dates[1]))
 
@@ -33,7 +32,6 @@ def filter_voting(voting_table: pd.DataFrame,
 
     return filtered_df
 
-
 def filter_votes(votes_table: pd.DataFrame,
                  persons_table: pd.DataFrame,
                  selected_persons: list[str],
@@ -42,7 +40,6 @@ def filter_votes(votes_table: pd.DataFrame,
     """
     Filter the individual votes table based on the deputees.
     """
-
     filtered_df = persons_table.copy()
     if selected_persons != []:
         filtered_df = filtered_df[filtered_df["person_fullname"].isin(
@@ -55,7 +52,6 @@ def filter_votes(votes_table: pd.DataFrame,
             selected_genre)]
 
     return votes_table[votes_table["vote_person_external_id"].isin(filtered_df["person_external_id"])]
-
 
 def create_table_to_plot(voting_table: pd.DataFrame,
                          votes_table: pd.DataFrame,
@@ -77,29 +73,6 @@ def create_table_to_plot(voting_table: pd.DataFrame,
         columns={'vote_person_fullname': 'Député.e'})
 
     return table_to_plot
-
-
-def plot_votes(data_to_plot: pd.DataFrame) -> str:
-    votes_columns = data_to_plot.columns[1:].to_list()
-    return (GT(data_to_plot)\
-        .data_color(
-            columns=votes_columns,
-            palette=["#004D40", "#D81B60", "#FFC107"],
-            domain=["Oui", "Non", "Abstention"],
-            na_color="white"
-        ).as_raw_html())
-
-def plot_voting(data_to_plot: pd.DataFrame, links_column: str) -> str:
-    data_to_plot[links_column] = "[" + data_to_plot[links_column] + "](" + data_to_plot[links_column] + ")"
-    # votes_columns = data_to_plot.columns[1:].to_list()
-    return (
-        GT(data_to_plot)
-        .fmt_markdown(columns=links_column)
-        .cols_width(
-            cases={
-                links_column: "10%"
-            }).as_raw_html()
-    )
 
 def create_info_table(voting_table: pd.DataFrame,
                       data_to_plot: pd.DataFrame) -> pd.DataFrame:
@@ -129,5 +102,15 @@ def create_info_table(voting_table: pd.DataFrame,
 
     return clean_voting
 
+palette_votes:dict[str,str] = {"Oui":"background-color: #004D40",
+                                "Non":"background-color: #D81B60",
+                                "Abstention":"background-color: #FFC107",
+                                "no_color":"background-color: white"}
 
+def color_picker(value: str, palette: dict[str] = palette_votes) -> tuple[str]:
+    if "no_color" not in palette.keys():
+        raise ValueError("No no_color in the palette")
+    if value in palette.keys():
+        return(palette[value])
+    return(palette["no_color"])
     
