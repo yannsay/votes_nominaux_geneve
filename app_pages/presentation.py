@@ -5,7 +5,7 @@ st.set_page_config(
     page_icon =":envelope_with_arrow:", 
 )
 
-st.write("# Vote nominaux du Grand Conseil de Genève")
+st.write("# Votes nominaux du Grand Conseil de Genève")
 
 st.markdown(
     """
