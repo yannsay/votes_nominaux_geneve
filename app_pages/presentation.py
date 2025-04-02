@@ -26,5 +26,7 @@ st.markdown(
 
     Source: [OpenParlData](https://gitlab.com/opendata.ch/openparldatach)
 
+    Contact me:
+    - [Yann Say](https://www.linkedin.com/in/yannsay/)
 """
 )
