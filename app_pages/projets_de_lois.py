@@ -3,13 +3,14 @@ import datetime
 
 from src.services import *
 st.set_page_config(layout="wide",
-                   page_title="Vote nominaux par projets de loi")
+                   page_title="Votes nominaux par projets de loi",
+                   page_icon =":envelope_with_arrow:")
 
 from src.repository import AppDatabase
 
 app_database = AppDatabase()
 
-st.title('Vote nominaux du Grand Conseil de Genève')
+st.title('Votes nominaux du Grand Conseil de Genève')
 
 # Side bar filters
 st.sidebar.header("Filtrez par:")
@@ -42,17 +43,14 @@ voting_table = filter_voting(voting_table=app_database.clean_voting,
                              selected_rubriques=selector_rubriques,
                              selected_chapitre=selector_chapitre,
                              selected_dates=selector_dates)
-
 ## Filter the votes
 votes_table = filter_votes(votes_table=app_database.clean_votes,
                            persons_table=app_database.clean_persons,
                            selected_persons = selector_persons,
                            selected_parties=selector_parties,
                            selected_genre=selector_genre)
-
 ## Create the final table
 table_to_plot = create_table_to_plot( voting_table=voting_table, votes_table=votes_table)
-
 ## Plot the final table
 votes_columns = table_to_plot.columns[1:].to_list()
 
@@ -65,4 +63,5 @@ info_table_to_plot = create_info_table(voting_table = app_database.clean_voting,
                                          data_to_plot = table_to_plot)
 ## Plot the extra information table
 st.dataframe(info_table_to_plot, 
-             column_config={"Lien Grand Conseil": st.column_config.LinkColumn("Lien Grand Conseil")})
+             column_config={"Lien Grand Conseil": st.column_config.LinkColumn("Lien Grand Conseil")}, 
+             hide_index=True)

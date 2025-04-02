@@ -19,7 +19,7 @@ class AppDatabase:
     def __init__(self) -> None:
         self.set_clean_rsge(RSGE_CSV)
         self.set_clean_voting(VOTING_CSV, rsge_data = self.clean_rsge)
-        self.set_clean_votes(VOTES_CSV)
+        self.set_clean_votes(VOTES_CSV, voting_data = self.clean_voting)
         self.set_clean_persons(PERSON_CSV, votes_data = self.clean_votes)
 
         self.set_rubriques_rsge(clean_rsge = self.clean_rsge)
@@ -62,7 +62,7 @@ class AppDatabase:
         self.clean_voting = clean_voting
 
     
-    def set_clean_votes(self, votes_file: str) -> None:
+    def set_clean_votes(self, votes_file: str, voting_data: pd.DataFrame) -> None:
         """
         Setter the votes table
         """
@@ -74,6 +74,7 @@ class AppDatabase:
         clean_votes = votes_raw.merge(vote_dict, how = "left",on = "vote_vote")
 
         clean_votes = clean_votes.drop(columns = ["vote_body_key", "vote_created_local", "vote_vote_display_de", "vote_vote_display_it", "vote_vote"]) 
+        clean_votes = clean_votes[clean_votes["vote_voting_external_id"].isin(voting_data["voting_external_id"])]
 
         self.clean_votes = clean_votes
         
@@ -139,3 +140,9 @@ class AppDatabase:
         self.max_date = clean_votings["voting_date"].max() + datetime.timedelta(days=1)
 
 
+if __name__ == '__main__':
+    # Write csv for tests
+    app_database = AppDatabase()
+    app_database.clean_votings.to_csv("pl_voting_clean.csv", index = False)
+    app_database.clean_votes.to_csv("clean_votes.csv", index = False)
+    app_database.clean_persons.to_csv("clean_persons.csv", index = False)

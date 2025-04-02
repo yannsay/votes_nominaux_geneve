@@ -2,7 +2,6 @@
 import datetime
 import pandas as pd
 import streamlit as st
-from great_tables import GT
 
 def filter_voting(voting_table: pd.DataFrame,
                   selected_rubriques: list[str],
@@ -76,6 +75,7 @@ def create_table_to_plot(voting_table: pd.DataFrame,
 
 def create_info_table(voting_table: pd.DataFrame,
                       data_to_plot: pd.DataFrame) -> pd.DataFrame:
+    """ Function to create the information table"""
     filtered_voting = voting_table.copy()
     filtered_voting = filtered_voting[filtered_voting["voting_title_fr"].isin(
         data_to_plot.columns)]

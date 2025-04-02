@@ -68,31 +68,31 @@ class TestServices(unittest.TestCase):
                                       selected_persons = [],
                                       selected_parties=[],
                                       selected_genre=[]).shape,
-                         (35455, 7))
+                         (7568,7))
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
                                       selected_persons = [],
                                       selected_parties=["S"],
                                       selected_genre=[]).shape,
-                         (6326, 7))
+                         (1370, 7))
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
                                       selected_persons = [],
                                       selected_parties=["S", "Ve"],
                                       selected_genre=[]).shape,
-                         (11944, 7))
+                         (2533, 7))
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
                                       selected_persons = [],
                                       selected_parties=[],
                                       selected_genre=["f"]).shape,
-                         (11041, 7))
+                         (2346, 7))
         self.assertEqual(filter_votes(votes_table=self.votes_clean,
                                       persons_table=self.persons_clean,
                                       selected_persons = ["Ana Roch"],
                                       selected_parties=[],
                                       selected_genre=[]).shape,
-                         (365, 7))
+                         (77, 7))
 
     def test_create_table_to_plot(self):
         """
