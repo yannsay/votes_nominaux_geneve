@@ -21,19 +21,22 @@ docker run --name gc_geneve_votes -d -p 8080:8501 gc_geneve_votes
 The purpose of this application is to filter the personal votes of the members of Geneva's Grand Conseil. It allows you to filter affairs by:
 
 - Headings and chapters of the Geneva Systematic Register,
-- Political party of the deputies
+- Types of voting,
+- Title of the voting,
+- Name of the deputy,
+- Political party of the deputies,
 - Gender of deputies
 
 The database was retrieved using the Open Parl Data project. The application covers votes for the current legislature (2023-2028), from 11 May 2023 to 15 February 2025 (the latest date for data import).
-There are only affairs with a code in the Registre Systématique.
 
-- 82 votes
-- 124 deputies
-- 7,568 nominal votes
+- 82 votings with a reference to Registre Systématique genevois and 319 other votings
+- 125 deputies
+- 35’455 nominal votes
 
 Source: 
 - [OpenParlData](https://gitlab.com/opendata.ch/openparldatach)
 - [SILGENEVE PUBLIC](https://silgeneve.ch/legis/)
+
 ##  Contacts
 [Yann Say](https://www.linkedin.com/in/yannsay/)
 

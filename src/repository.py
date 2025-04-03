@@ -18,17 +18,21 @@ def load_data(csv_path):
 class AppDatabase:
     def __init__(self) -> None:
         self.set_clean_rsge(RSGE_CSV)
-        self.set_clean_voting(VOTING_CSV, rsge_data = self.clean_rsge)
-        self.set_clean_votes(VOTES_CSV, voting_data = self.clean_voting)
+        self.set_clean_votings(VOTING_CSV, rsge_data = self.clean_rsge)
+        self.set_clean_votes(VOTES_CSV)
         self.set_clean_persons(PERSON_CSV, votes_data = self.clean_votes)
 
         self.set_rubriques_rsge(clean_rsge = self.clean_rsge)
         self.set_clean_persons_x(clean_persons = self.clean_persons)
-        self.set_min_max_dates(clean_votings = self.clean_voting)
+        self.set_min_max_dates(clean_votings = self.clean_rsge_voting)
+        self.set_type_votes(clean_oth_voting = self.clean_oth_voting)
 
-    def set_clean_voting(self, votings_file: str, rsge_data: pd.DataFrame) -> None:
+
+    def set_clean_votings(self, votings_file: str, rsge_data: pd.DataFrame) -> None:
         """
-        Setter for the voting table
+        Setter for the voting tables. It will set 2 tables:
+        - one with votings with RSGE: clean_rsge_voting
+        - one with votings without RSGE: voting_oth_clean
         Clean the voting table and add the information from RSGE
         """
         clean_voting = load_data(votings_file)
@@ -41,7 +45,30 @@ class AppDatabase:
         # Add the type of vote       
         pattern = r'([A-Z]{1,2})'
         clean_voting['type_vote'] = clean_voting['voting_affair_number'].str.extract(pattern)
-        
+        vote_dict = pd.DataFrame({"type_vote":["IN", 
+                                               "M", 
+                                               "P",
+                                               "PL",
+                                               "PO",
+                                               "R",
+                                               "RD"],
+                                  "type_vote_label":["Initiative populaire cantonale", 
+                                                "Proposition de motion", 
+                                                "Pétition",
+                                                "Projet de loi",
+                                                "Proposition de postulat",
+                                                "Proposition de résolution",
+                                                "Rapport"]})
+
+        clean_voting = clean_voting.merge(vote_dict, how = "left",on = "type_vote")
+        clean_voting = clean_voting.drop(columns = "type_vote")
+
+        # Clean dates for filter in streamlit
+        clean_voting["voting_date"] = pd.to_datetime(clean_voting["voting_date"])  
+
+        # Filter keep text without a Référence from RSGE     
+        oth_voting = clean_voting.loc[pd.isna(clean_voting['Référence']),].reset_index()  
+
         # Filter out text without a Référence from RSGE
         clean_voting = clean_voting.loc[~pd.isna(clean_voting['Référence']),].reset_index()
 
@@ -55,14 +82,14 @@ class AppDatabase:
         # Add RSGE information to voting
         clean_rsge = rsge_data
         clean_voting= clean_voting.merge(clean_rsge, on = "Référence", how = "left")
-        
-        # Clean dates for filter in streamlit
-        clean_voting["voting_date"] = pd.to_datetime(clean_voting["voting_date"])  
+        self.clean_rsge_voting = clean_voting
 
-        self.clean_voting = clean_voting
+        # Removing missing titles with oth_voting
+        clean_oth_voting = oth_voting.loc[~pd.isna(oth_voting['voting_affair_title_fr']),].reset_index()  
 
-    
-    def set_clean_votes(self, votes_file: str, voting_data: pd.DataFrame) -> None:
+        self.clean_oth_voting = clean_oth_voting
+
+    def set_clean_votes(self, votes_file: str) -> None:
         """
         Setter the votes table
         """
@@ -74,7 +101,6 @@ class AppDatabase:
         clean_votes = votes_raw.merge(vote_dict, how = "left",on = "vote_vote")
 
         clean_votes = clean_votes.drop(columns = ["vote_body_key", "vote_created_local", "vote_vote_display_de", "vote_vote_display_it", "vote_vote"]) 
-        clean_votes = clean_votes[clean_votes["vote_voting_external_id"].isin(voting_data["voting_external_id"])]
 
         self.clean_votes = clean_votes
         
@@ -139,10 +165,18 @@ class AppDatabase:
         self.min_date = clean_votings["voting_date"].min()
         self.max_date = clean_votings["voting_date"].max() + datetime.timedelta(days=1)
 
+    def set_type_votes(self, clean_oth_voting: pd.DataFrame) -> None:
+        """
+        Create list for selector in streamlit.
+        """
+        type_votes = clean_oth_voting[["type_vote_label"]].drop_duplicates(["type_vote_label"]).sort_values(by=["type_vote_label"])
+        self.type_votes = type_votes["type_vote_label"].to_list()
+
 
 if __name__ == '__main__':
     # Write csv for tests
     app_database = AppDatabase()
-    app_database.clean_votings.to_csv("pl_voting_clean.csv", index = False)
+    app_database.clean_rsge_voting.to_csv("clean_rsge_voting.csv", index = False)
+    app_database.clean_oth_voting.to_csv("clean_oth_voting.csv", index = False)
     app_database.clean_votes.to_csv("clean_votes.csv", index = False)
     app_database.clean_persons.to_csv("clean_persons.csv", index = False)
