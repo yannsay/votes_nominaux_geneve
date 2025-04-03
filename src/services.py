@@ -3,10 +3,11 @@ import datetime
 import pandas as pd
 import streamlit as st
 
+
 def filter_rsge_voting(voting_table: pd.DataFrame,
-                  selected_rubriques: list[str],
-                  selected_chapitre: list[str],
-                  selected_dates: tuple[datetime.date]) -> pd.DataFrame:
+                       selected_rubriques: list[str],
+                       selected_chapitre: list[str],
+                       selected_dates: tuple[datetime.date]) -> pd.DataFrame:
     """
     Function to filter the voting table
     """
@@ -31,6 +32,7 @@ def filter_rsge_voting(voting_table: pd.DataFrame,
 
     return filtered_df
 
+
 def filter_votes(votes_table: pd.DataFrame,
                  persons_table: pd.DataFrame,
                  selected_persons: list[str],
@@ -51,6 +53,7 @@ def filter_votes(votes_table: pd.DataFrame,
             selected_genre)]
 
     return votes_table[votes_table["vote_person_external_id"].isin(filtered_df["person_external_id"])]
+
 
 def create_table_to_plot(voting_table: pd.DataFrame,
                          votes_table: pd.DataFrame,
@@ -73,9 +76,10 @@ def create_table_to_plot(voting_table: pd.DataFrame,
 
     return table_to_plot
 
+
 def create_info_table(voting_table: pd.DataFrame,
-                           data_to_plot: pd.DataFrame,
-                           rgse_type: bool = True) -> pd.DataFrame:
+                      data_to_plot: pd.DataFrame,
+                      rgse_type: bool = True) -> pd.DataFrame:
     """ Function to create the information table
         rsge_type: If the info table is for Registre Systématique."""
     filtered_voting = voting_table.copy()
@@ -87,10 +91,11 @@ def create_info_table(voting_table: pd.DataFrame,
         " ", "%20")
     columns_to_keep = ["voting_affair_number", "voting_date", "voting_title_fr", "voting_affair_title_fr", "lien_grand_conseil", "voting_results_yes",
                        "voting_results_no", "voting_results_abstention", "type_vote_label"]
-    
+
     if rgse_type:
-        columns_to_keep += ["Référence", "Intitulé rubrique", "Intitulé chapitre", "Intitulé"]
-    
+        columns_to_keep += ["Référence", "Intitulé rubrique",
+                            "Intitulé chapitre", "Intitulé"]
+
     clean_voting = filtered_voting.loc[:, columns_to_keep]
 
     dictionnaire_name = {"voting_affair_number": "Identifiant affaire",
@@ -108,22 +113,25 @@ def create_info_table(voting_table: pd.DataFrame,
 
     return clean_voting
 
-palette_votes:dict[str,str] = {"Oui":"background-color: #004D40",
-                                "Non":"background-color: #D81B60",
-                                "Abstention":"background-color: #FFC107",
-                                "no_color":"background-color: white"}
+
+palette_votes: dict[str, str] = {"Oui": "background-color: #004D40",
+                                 "Non": "background-color: #D81B60",
+                                 "Abstention": "background-color: #FFC107",
+                                 "no_color": "background-color: white"}
+
 
 def color_picker(value: str, palette: dict[str] = palette_votes) -> tuple[str]:
     if "no_color" not in palette.keys():
         raise ValueError("No no_color in the palette")
     if value in palette.keys():
-        return(palette[value])
-    return(palette["no_color"])
+        return (palette[value])
+    return (palette["no_color"])
+
 
 def filter_oth_voting(voting_table: pd.DataFrame,
-                   selected_type_votes: list[str],
-                  selected_titres: list[str],
-                  selected_dates: tuple[datetime.date]) -> pd.DataFrame:
+                      selected_type_votes: list[str],
+                      selected_titres: list[str],
+                      selected_dates: tuple[datetime.date]) -> pd.DataFrame:
     """
     Function to filter the voting table
     """
@@ -138,7 +146,7 @@ def filter_oth_voting(voting_table: pd.DataFrame,
     except:
         st.error("Please select start date and end date")
         return
-    
+
     if selected_type_votes != []:
         filtered_df = filtered_df[filtered_df["type_vote_label"].isin(
             selected_type_votes)]

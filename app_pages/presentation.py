@@ -1,8 +1,8 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title = "Votes nominaux du Grand Conseil de Genève",
-    page_icon =":envelope_with_arrow:", 
+    page_title="Votes nominaux du Grand Conseil de Genève",
+    page_icon=":envelope_with_arrow:",
 )
 
 st.write("# Votes nominaux du Grand Conseil de Genève")
